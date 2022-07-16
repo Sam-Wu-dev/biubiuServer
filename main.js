@@ -3,32 +3,25 @@ import { Player } from './player.js';
 import { networkInterfaces } from 'os';
 import express from 'express';
 import cors from 'cors';
-import fs from 'fs';
 var app = express();
-const corsOptions = {
-    origin: [
-      'file:///D:/MyProject/biubiuServer/index.html',
-      'http://localhost:3000/',
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-app.use(cors(corsOptions));
+var nowImage = "";
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+}));
 
-app.post('/test',cors(corsOptions),function (req, res) {
-    //cors
-    res.send('/index.html');
-}
-);
-app.get('/', function (req, res) {
-    //cors
-    res.send('/index.haaatml');
-}
-);
-app.listen(3000, function () {
-    console.log('Example app listening on port 3000!');
-}
-);
+app.get('/', function(req, res) {
+    res.send('Hello GET');
+})
+
+app.post('/', function(req, res) {
+    res.send(nowImage);
+})
+
+var server = app.listen(8080, function() {
+    var host = server.address().address
+    var port = server.address().port
+})
 
 const nets = networkInterfaces();
 const ip = {}; // Or just '{}', an empty object
@@ -50,11 +43,12 @@ for (const name of Object.keys(nets)) {
 let gameRoom = new Map();
 
 let count = 0;
-function getFromClient(socket,data){
-    try{
+
+function getFromClient(socket, data) {
+    try {
         const clientJson = JSON.parse(data);
 
-        switch(clientJson.type){
+        switch (clientJson.type) {
             case "EGR":
                 //Enter Game Room
                 console.log(clientJson);
@@ -62,15 +56,16 @@ function getFromClient(socket,data){
                 let id = gameRoom.size;
                 console.log("Player " + clientJson.name + " has ID " + id);
                 let player = new Player(clientJson.name, id, socket);
-                gameRoom.set(socket.remoteAddress,player);
-                sendToClient(socket,"GTI",{
+                gameRoom.set(socket.remoteAddress, player);
+                sendToClient(socket, "GTI", {
                     // Get Temporary ID
-                    "id":id,
+                    "id": id,
                 });
                 break;
             case "F":
                 // First person perspective frame
                 let Base64_JPEG = clientJson.Base64_JPEG;
+                nowImage = Base64_JPEG;
                 //let JPEG = Buffer(Base64_JPEG);
                 // openpose JPEG
                 // let f = fs.createWriteStream("images" + count + ".txt");
@@ -81,7 +76,7 @@ function getFromClient(socket,data){
                 break;
 
         }
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
 }

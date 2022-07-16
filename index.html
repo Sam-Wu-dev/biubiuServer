@@ -1,32 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html>
 
+<head>
+    <title>Test</title>
 </head>
+
 <body>
-    <h1>
-        test
-    </h1>
+    <canvas id="canvas" width="600" height="600"></canvas>
 </body>
 <script>
-    fetch('http://localhost:3000/', {
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            name: 'test',
-            age: 'test'
-        })
-    })
-  .then(function(response) {
-    console.log(response);
-    return response.json();
-  })
-  .then(function(myJson) {
-    console.log(myJson);
-  });
+    function getFetch() {
+        return new Promise(function(resolve) {
+            fetch('http://localhost:8080/', {
+                    method: 'POST',
+                })
+                .then(response => {
+                    return response.text();
+                }).then(text => {
+                    return resolve(text);
+                })
+        });
+    }
+
+    var ctx = document.getElementById('canvas').getContext('2d');
+    var error = false;
+
+    let framkey = 0;
+
+    function delay(n) {
+        return new Promise(function(resolve) {
+            setTimeout(resolve, n);
+        });
+    }
+
+    const drawFrame = async function() {
+        console.log(framkey);
+
+        await getFetch().then(r => {
+            console.log(r);
+
+            var img = new Image();
+            img.addEventListener('error', () => {
+                console.log('加載出了問題');
+                error = true;
+            })
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+            };
+
+            img.src = `data:image/jpeg;base64,${r}`;
+        });
+
+        //img.src=`data:image/jpeg;base64,${jpgName}`
+
+        await delay(40);
+        framkey++;
+
+        if (error) {
+            window.cancelAnimationFrame(drawFrame);
+        } else {
+            window.requestAnimationFrame(drawFrame);
+        }
+    }
+
+    window.requestAnimationFrame(drawFrame);
 </script>
+
 </html>
