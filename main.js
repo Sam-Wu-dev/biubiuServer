@@ -2,44 +2,29 @@ import net from 'net';
 import { Player } from './player.js';
 import { networkInterfaces } from 'os';
 import express from 'express';
-import cors from 'cors';
 import { WebSocketServer } from 'ws'
+var app = express();
 
-const serverr = express().listen(8080, () => {
-    console.log('Server started on port 8080');
-});
-const wss = new WebSocketServer({
-    server: serverr,
+var server = app.listen(8080, function () {
+    var host = server.address().address
+    var port = server.address().port
+  })
 
-});
-wss.on('connection', (ws) => {
-    console.log('Client connected yah!');
-    ws.on('message', (message) => {
-        console.log(message);
-    });
+  const wss = new WebSocketServer({ server })
+
+  wss.on('connection', ws => {
+    console.log('連接')
+
+    const sendImage = setInterval(() => {
+                ws.send(nowImage);
+            }, 1000 / 50);
+
     ws.on('close', () => {
-        console.log('Client disconnected');
-    });
-});
-// var app = express();
+      console.log('斷開連接')
+    })
+  })
+
 var nowImage = "";
-// app.use(cors({
-//     origin: '*',
-//     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
-// }));
-
-// app.get('/', function(req, res) {
-//     res.send('Hello GET');
-// })
-
-// app.post('/', function(req, res) {
-//     res.send(nowImage);
-// })
-
-// var server = app.listen(8080, function() {
-//     var host = server.address().address
-//     var port = server.address().port
-// })
 
 const nets = networkInterfaces();
 const ip = {}; // Or just '{}', an empty object
@@ -83,13 +68,7 @@ function getFromClient(socket, data) {
             case "F":
                 // First person perspective frame
                 let Base64_JPEG = clientJson.Base64_JPEG;
-                wss.write(Base64_JPEG);
-                //nowImage = Base64_JPEG;
-                //let JPEG = Buffer(Base64_JPEG);
-                // openpose JPEG
-                // let f = fs.createWriteStream("images" + count + ".txt");
-                // f.write(Base64_JPEG);
-                // f.end();
+                nowImage = Base64_JPEG;
                 count++;
                 console.log("Frame " + count + " received.");
                 break;
