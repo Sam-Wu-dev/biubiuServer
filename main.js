@@ -3,25 +3,43 @@ import { Player } from './player.js';
 import { networkInterfaces } from 'os';
 import express from 'express';
 import cors from 'cors';
-var app = express();
+import { WebSocketServer } from 'ws'
+
+const serverr = express().listen(8080, () => {
+    console.log('Server started on port 8080');
+});
+const wss = new WebSocketServer({
+    server: serverr,
+
+});
+wss.on('connection', (ws) => {
+    console.log('Client connected yah!');
+    ws.on('message', (message) => {
+        console.log(message);
+    });
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
+});
+// var app = express();
 var nowImage = "";
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
-}));
+// app.use(cors({
+//     origin: '*',
+//     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+// }));
 
-app.get('/', function(req, res) {
-    res.send('Hello GET');
-})
+// app.get('/', function(req, res) {
+//     res.send('Hello GET');
+// })
 
-app.post('/', function(req, res) {
-    res.send(nowImage);
-})
+// app.post('/', function(req, res) {
+//     res.send(nowImage);
+// })
 
-var server = app.listen(8080, function() {
-    var host = server.address().address
-    var port = server.address().port
-})
+// var server = app.listen(8080, function() {
+//     var host = server.address().address
+//     var port = server.address().port
+// })
 
 const nets = networkInterfaces();
 const ip = {}; // Or just '{}', an empty object
@@ -65,7 +83,8 @@ function getFromClient(socket, data) {
             case "F":
                 // First person perspective frame
                 let Base64_JPEG = clientJson.Base64_JPEG;
-                nowImage = Base64_JPEG;
+                wss.write(Base64_JPEG);
+                //nowImage = Base64_JPEG;
                 //let JPEG = Buffer(Base64_JPEG);
                 // openpose JPEG
                 // let f = fs.createWriteStream("images" + count + ".txt");
