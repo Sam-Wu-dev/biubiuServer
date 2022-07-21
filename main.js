@@ -2,6 +2,7 @@ import net from 'net';
 import { Player } from './player.js';
 import { networkInterfaces } from 'os';
 import express from 'express';
+import fs from 'fs';
 import { WebSocketServer } from 'ws'
 var app = express();
 
@@ -69,9 +70,11 @@ function getFromClient(socket, data) {
                 // First person perspective frame
                 let Base64_JPEG = clientJson.Base64_JPEG;
                 nowImage = Base64_JPEG;
+                fs.writeFileSync("./image.jpg", Base64_JPEG, "base64");
                 count++;
                 console.log("Frame " + count + " received.");
                 break;
+
 
         }
     } catch (e) {

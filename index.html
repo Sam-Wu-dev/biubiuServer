@@ -9,7 +9,6 @@
 <script>
 var ctx = document.getElementById('canvas').getContext('2d');
 var ws = new WebSocket('ws://localhost:8080')
-
 ws.onopen = () => {
     console.log('連綫成功')
 }
